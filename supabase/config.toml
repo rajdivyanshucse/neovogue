@@ -1,0 +1,7 @@
+project_id = "owsbegbhytrdwhmnalcn"
+
+[functions.ai-design-suggestions]
+verify_jwt = false
+ 
+ [functions.ai-generate-design]
+ verify_jwt = false
