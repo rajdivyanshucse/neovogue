@@ -63,7 +63,8 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
 
 export function SustainabilitySection() {
   return (
-    <section id="sustainability" className="py-24 bg-accent text-accent-foreground">
+    <section id="sustainability" className="py-24 bg-background text-foreground"> 
+      {/* Changed from bg-accent text-accent-foreground to match image 2 */}
       <div className="container mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -79,7 +80,7 @@ export function SustainabilitySection() {
           <h2 className="text-4xl md:text-5xl font-serif font-bold mb-4">
             Fashion That Heals the <span className="text-primary">Planet</span>
           </h2>
-          <p className="text-lg text-accent-foreground/70 max-w-2xl mx-auto">
+          <p className="text-lg text-accen-foreground/70 max-w-2xl mx-auto">
             Every redesigned dress is a step towards a more sustainable future. 
             Here's the impact our community has made together.
           </p>
@@ -93,7 +94,7 @@ export function SustainabilitySection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className="text-center p-8 rounded-xl bg-accent-foreground/5 border border-accent-foreground/10"
+              className="text-center p-8 rounded-xl bg-card border border-border"
             >
               <div className="w-16 h-16 rounded-full bg-success/20 flex items-center justify-center mx-auto mb-6">
                 <stat.icon className="w-8 h-8 text-success" />
