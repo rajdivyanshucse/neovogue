@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +9,19 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/lib/auth';
 import { z } from 'zod';
 
+
 type AppRole = 'customer' | 'designer' | 'delivery_partner' | 'admin';
+
+
+const slideImages = [
+  { id: 1, src: `${import.meta.env.BASE_URL}assets/image5.jpg`, title: 'Sustainable Silk' },
+  { id: 2, src: `${import.meta.env.BASE_URL}assets/image2.jpg`, title: 'Upcycled Detail' },
+  { id: 3, src: `${import.meta.env.BASE_URL}assets/image3.jpg`, title: 'Nature & Fabric' },
+  { id: 4, src: `${import.meta.env.BASE_URL}assets/image4.jpg`, title: 'Craft & Connection' },
+  { id: 5, src: `${import.meta.env.BASE_URL}assets/image1.jpg`, title: 'Craft & Connection' },
+  // { id: 6, src: `${import.meta.env.BASE_URL}assets/image6.jpg`, title: 'Craft & Connection' },
+
+];
 
 const signUpSchema = z.object({
   fullName: z.string().min(2, 'Name must be at least 2 characters'),
@@ -39,7 +51,9 @@ export default function AuthPage() {
   );
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  
   const [selectedRole, setSelectedRole] = useState<AppRole>('customer');
+  const [currentSlide, setCurrentSlide] = useState(0);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -47,6 +61,13 @@ export default function AuthPage() {
     password: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slideImages.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (user && role) {
@@ -68,223 +89,137 @@ export default function AuthPage() {
         if (!result.success) {
           const fieldErrors: Record<string, string> = {};
           result.error.errors.forEach((err) => {
-            if (err.path[0]) {
-              fieldErrors[err.path[0] as string] = err.message;
-            }
+            if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
           });
           setErrors(fieldErrors);
           setLoading(false);
           return;
         }
-
         const { error } = await signUp(formData.email, formData.password, selectedRole, formData.fullName);
         if (error) {
-          toast({
-            title: 'Sign up failed',
-            description: error.message,
-            variant: 'destructive',
-          });
-        } else {
-          toast({
-            title: 'Welcome to NeoVogue!',
-            description: 'Your account has been created successfully.',
-          });
+          toast({ title: 'Sign up failed', description: error.message, variant: 'destructive' });
         }
       } else {
         const result = signInSchema.safeParse(formData);
         if (!result.success) {
           const fieldErrors: Record<string, string> = {};
           result.error.errors.forEach((err) => {
-            if (err.path[0]) {
-              fieldErrors[err.path[0] as string] = err.message;
-            }
+            if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
           });
           setErrors(fieldErrors);
           setLoading(false);
           return;
         }
-
         const { error } = await signIn(formData.email, formData.password);
         if (error) {
-          toast({
-            title: 'Sign in failed',
-            description: error.message,
-            variant: 'destructive',
-          });
+          toast({ title: 'Sign in failed', description: error.message, variant: 'destructive' });
         }
       }
     } catch (err) {
-      toast({
-        title: 'Error',
-        description: 'Something went wrong. Please try again.',
-        variant: 'destructive',
-      });
+      toast({ title: 'Error', description: 'Something went wrong.', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex">
-      {/* Left Panel - Form */}
+    <div className="min-h-screen flex bg-background">
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 md:px-16 lg:px-24 py-12">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground mb-12">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Home
+          <ArrowLeft className="w-4 h-4" /> Back to Home
         </Link>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
           <h1 className="text-3xl md:text-4xl font-serif font-bold mb-2">
             {mode === 'signup' ? 'Join NeoVogue' : 'Welcome Back'}
           </h1>
-          <p className="text-muted-foreground mb-8">
-            {mode === 'signup'
-              ? 'Create your account to start your sustainable fashion journey.'
-              : 'Sign in to continue your sustainable fashion journey.'}
-          </p>
-
-          <form onSubmit={handleSubmit} className="space-y-6">
+          
+          <form onSubmit={handleSubmit} className="space-y-6 mt-8">
             {mode === 'signup' && (
               <>
-                {/* Role Selection */}
                 <div className="space-y-3">
                   <Label>I want to join as</Label>
                   <div className="grid gap-3">
-                    {roles.map((role) => (
+                    {roles.map((r) => (
                       <button
-                        key={role.value}
+                        key={r.value}
                         type="button"
-                        onClick={() => setSelectedRole(role.value)}
+                        onClick={() => setSelectedRole(r.value)}
                         className={`p-4 rounded-lg border text-left transition-all ${
-                          selectedRole === role.value
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:border-primary/50'
+                          selectedRole === r.value ? 'border-primary bg-primary/5' : 'border-border'
                         }`}
                       >
-                        <div className="font-medium">{role.label}</div>
-                        <div className="text-sm text-muted-foreground">{role.description}</div>
+                        <div className="font-medium">{r.label}</div>
+                        <div className="text-sm text-muted-foreground">{r.description}</div>
                       </button>
                     ))}
                   </div>
                 </div>
-
-                {/* Full Name */}
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    type="text"
-                    placeholder="Enter your full name"
-                    value={formData.fullName}
-                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                    className={errors.fullName ? 'border-destructive' : ''}
-                  />
-                  {errors.fullName && <p className="text-sm text-destructive">{errors.fullName}</p>}
-                </div>
+                <Input
+                  placeholder="Full Name"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                />
               </>
             )}
-
-            {/* Email */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+            <Input
+              type="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            />
+            <div className="relative">
               <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={errors.email ? 'border-destructive' : ''}
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               />
-              {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
+              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3">
+                {showPassword ? <EyeOff size={16}/> : <Eye size={16}/>}
+              </button>
             </div>
-
-            {/* Password */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={errors.password ? 'border-destructive pr-10' : 'pr-10'}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
-              </div>
-              {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full bg-accent text-accent-foreground hover:bg-accent/90"
-              disabled={loading}
-            >
-              {loading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : mode === 'signup' ? (
-                'Create Account'
-              ) : (
-                'Sign In'
-              )}
+            <Button className="w-full" disabled={loading}>
+              {loading ? <Loader2 className="animate-spin" /> : mode === 'signup' ? 'Create Account' : 'Sign In'}
             </Button>
           </form>
-
-          <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === 'signup' ? (
-              <>
-                Already have an account?{' '}
-                <button
-                  onClick={() => setMode('signin')}
-                  className="text-primary font-medium hover:underline"
-                >
-                  Sign in
-                </button>
-              </>
-            ) : (
-              <>
-                Don't have an account?{' '}
-                <button
-                  onClick={() => setMode('signup')}
-                  className="text-primary font-medium hover:underline"
-                >
-                  Sign up
-                </button>
-              </>
-            )}
-          </p>
+          <button onClick={() => setMode(mode === 'signup' ? 'signin' : 'signup')} className="mt-4 text-primary w-full text-center">
+             {mode === 'signup' ? 'Already have an account? Sign in' : "Don't have an account? Sign up"}
+          </button>
         </motion.div>
       </div>
 
-      {/* Right Panel - Visual */}
-      <div className="hidden lg:flex w-1/2 bg-accent items-center justify-center p-12">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6 }}
-          className="text-center text-accent-foreground"
-        >
-          <div className="w-32 h-32 mx-auto mb-8 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-5xl font-serif font-bold text-primary">N</span>
+      {/* Right Panel - Visual Slideshow */}
+      <div className="hidden lg:flex w-1/2 relative items-center justify-center overflow-hidden bg-zinc-900">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={slideImages[currentSlide].id}
+            src={slideImages[currentSlide].src}
+            alt={slideImages[currentSlide].title}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="absolute inset-0 w-full h-full object-cover"
+            onError={(e) => console.error("Image load failed:", slideImages[currentSlide].src)}
+          />
+        </AnimatePresence>
+        
+        <div className="absolute inset-0 bg-black/00 z-10" /> 
+
+        <div className="relative z-20 text-center text-white px-12">
+           <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
+              <span className="text-3xl font-bold">NV</span>
+           </div>
+           <h2 className="text-4xl font-serif font-bold mb-4">Sustainable Fashion Reimagined</h2>
+           <p className="text-white/100">Join the movement toward ethical style.</p>
+           
+           <div className="flex gap-2 mt-8 justify-center">
+            {slideImages.map((_, idx) => (
+              <div key={idx} className={`h-1.5 rounded-full transition-all ${currentSlide === idx ? "w-8 bg-white" : "w-2 bg-white/30"}`} />
+            ))}
           </div>
-          <h2 className="text-3xl font-serif font-bold mb-4">
-            Sustainable Fashion <span className="text-primary">Reimagined</span>
-          </h2>
-          <p className="text-accent-foreground/70 max-w-md">
-            Join thousands of fashion lovers who are transforming their wardrobes 
-            while making a positive impact on the planet.
-          </p>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

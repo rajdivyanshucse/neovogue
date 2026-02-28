@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import designerAvatar1 from '@/assets/designer-avatar-1.jpg';
 import designerAvatar2 from '@/assets/designer-avatar-2.jpg';
+import designerAvatar3 from '@/assets/mendes.jpeg';
+import designerAvatar4 from '@/assets/girldis.jpeg';
 
 const designers = [
   {
@@ -12,7 +14,7 @@ const designers = [
     rating: 4.9,
     projects: 156,
     verified: true,
-    avatar: designerAvatar1,
+    avatar: designerAvatar4,
   },
   {
     name: 'Marcus Rivera',
@@ -28,7 +30,7 @@ const designers = [
     rating: 4.9,
     projects: 98,
     verified: true,
-    avatar: designerAvatar1,
+    avatar: designerAvatar3,
   },
   {
     name: 'Elena Volkov',
@@ -36,7 +38,7 @@ const designers = [
     rating: 4.7,
     projects: 87,
     verified: true,
-    avatar: designerAvatar2,
+    avatar: designerAvatar1,
   },
 ];
 

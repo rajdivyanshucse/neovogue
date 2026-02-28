@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import Designers from "./pages/Designers";
 import DesignerProfile from "./pages/DesignerProfile";
+// import HelpSupport from "./pages/HelpSupport";
 
 // Customer Routes
 import CustomerDashboard from "./pages/customer/Dashboard";
@@ -199,6 +200,7 @@ const App = () => (
                   <AdminSettings />
                 </ProtectedRoute>
               } />
+              {/* <Route path="/support" element={<HelpSupport />} /> */}
               
               <Route path="*" element={<NotFound />} />
             </Routes>
